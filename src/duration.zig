@@ -100,20 +100,9 @@ pub fn durationParse(buf: []const u8) DurationParseError!Duration {
             const cast = math.lossyCast;
             const scaled = cast(f64, f) * cast(f64, unit) / scale;
             v += cast(u64, scaled);
-            if (isu64Overflow(v)) {
-                return DurationParseError.Overflow;
-            }
         }
 
         d += v;
-
-        if (isu64Overflow(d)) {
-            return DurationParseError.Overflow;
-        }
-    }
-
-    if (isu64Overflow(d)) {
-        return DurationParseError.Overflow;
     }
 
     return d;
@@ -169,10 +158,6 @@ fn leadingFraction(buf: []const u8) !ScannedLeadingFraction {
         }
 
         var y = 10 * x + @as(u64, ch) - 0;
-        if (isu64Overflow(y)) {
-            overflow = true;
-            continue;
-        }
         x = y;
         scale *= 10;
         i += 1;
@@ -191,7 +176,3 @@ const unitMap = ComptimeStringMap(u64, .{
     .{ "m", time.ns_per_min },
     .{ "h", time.ns_per_hour },
 });
-
-fn isu64Overflow(x: u64) bool {
-    return x >= math.maxInt(u64) - 1;
-}
